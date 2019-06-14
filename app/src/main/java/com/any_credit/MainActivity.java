@@ -1,7 +1,9 @@
 package com.any_credit;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -31,12 +33,21 @@ import android.widget.Toast;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import static android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SelectStoreInterface {
+    TextView lbl_credit;
+    Toolbar titlebar;
+    Button btn_add;
+    Button btn_remove;
     private SpinnerClass spinner;
+    SharedPreferences allStores;
+    SharedPreferences.Editor allStoresEditor;
+    Set<String> storeSet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +62,6 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                Toast.makeText(MainActivity.this, "Test", Toast.LENGTH_LONG).show();
             }
         });
 
@@ -63,7 +73,22 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
 
-        spinner = new SpinnerClass(this, (Spinner) findViewById(R.id.storeDropdown));
+        lbl_credit = (TextView) findViewById(R.id.lbl_credit);
+        titlebar = (Toolbar) findViewById(R.id.toolbar);
+        btn_add = (Button) findViewById(R.id.btn_add);
+        btn_remove = (Button) findViewById(R.id.btn_remove);
+
+        allStores = getSharedPreferences("stores", MODE_PRIVATE);
+        storeSet = allStores.getStringSet("stores", new HashSet<String>());
+
+        if (storeSet.isEmpty()) {
+            storeSet.add("Home");
+        }
+        allStoresEditor = allStores.edit();
+        allStoresEditor.putStringSet("stores", storeSet);
+        allStoresEditor.apply();
+
+        spinner = new SpinnerClass(this, this, (Spinner) findViewById(R.id.storeDropdown), allStores);
     }
 
     @Override
@@ -119,7 +144,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
     PopupWindow popupWindow;
-    private void addStore() {
+    protected void addStore() {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
         alert.setTitle("Enter Store Name:");
@@ -130,7 +155,12 @@ public class MainActivity extends AppCompatActivity
 
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                selectStore(input.getText().toString());
+                String storeName = input.getText().toString();
+                MainActivity.this.spinner.addDropdownItem(storeName);
+                storeSet.add(storeName);
+                allStoresEditor.putStringSet("stores", storeSet);
+                allStoresEditor.apply();
+                selectStore(storeName);
             }
         });
 
@@ -142,15 +172,9 @@ public class MainActivity extends AppCompatActivity
 
         alert.show();
     }
-
-    private void selectStore(String storeName) {
-        final TextView lbl_credit = (TextView) findViewById(R.id.lbl_credit);
-        final Toolbar titlebar = (Toolbar) findViewById(R.id.toolbar);
-        final Button btn_add = (Button) findViewById(R.id.btn_add);
-        final Button btn_remove = (Button) findViewById(R.id.btn_remove);
-
-        titlebar.setTitle(storeName);
-        this.spinner.addDropdownItem(storeName);
+    @Override
+    public void selectStore(String storeName) {
+        this.titlebar.setTitle(storeName);
 
         final StoreSave store = new StoreSave(storeName, this.getApplicationContext());
 
@@ -184,7 +208,9 @@ public class MainActivity extends AppCompatActivity
 
                 alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        store.addCredit(Float.parseFloat(input.getText().toString()));
+                        if (!input.getText().toString().isEmpty()) {
+                            store.addCredit(Float.parseFloat(input.getText().toString()));
+                        }
                     }
                 });
 
@@ -212,7 +238,9 @@ public class MainActivity extends AppCompatActivity
 
                 alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        store.removeCredit(Float.parseFloat(input.getText().toString()));
+                        if (!input.getText().toString().isEmpty()) {
+                            store.removeCredit(Float.parseFloat(input.getText().toString()));
+                        }
                     }
                 });
 

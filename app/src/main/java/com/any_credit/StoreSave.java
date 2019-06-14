@@ -6,6 +6,7 @@ import android.icu.math.BigDecimal;
 
 import java.beans.PropertyChangeSupport;
 import java.math.RoundingMode;
+import java.util.Map;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -29,8 +30,14 @@ public class StoreSave {
 
     public void addCredit(float amount) {
         this.credit += amount;
-
         storeCredit();
+
+
+        Map<String, ?> storeMap = store.getAll();
+        System.out.println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+        for (Map.Entry<String, ?> store : storeMap.entrySet()) {
+            System.out.println("Entry: " + store.getKey() + ":" + store.getValue().toString());
+        }
     }
 
     public void removeCredit(float amount) {
