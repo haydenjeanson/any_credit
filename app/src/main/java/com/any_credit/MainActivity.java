@@ -55,9 +55,8 @@ public class MainActivity extends AppCompatActivity implements SelectStoreInterf
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        Button btn_addStore = (Button) findViewById(R.id.btn_addStore);
+        btn_addStore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 addStore();
