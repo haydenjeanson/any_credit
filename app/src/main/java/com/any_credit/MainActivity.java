@@ -1,41 +1,26 @@
 package com.any_credit;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-
 import android.view.View;
 
 import androidx.core.view.GravityCompat;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-
-import android.view.MenuItem;
-
-import com.google.android.material.navigation.NavigationView;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
-import android.view.Menu;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import static android.text.InputType.TYPE_CLASS_NUMBER;
@@ -43,7 +28,6 @@ import static android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL;
 
 public class MainActivity extends AppCompatActivity implements SelectStoreInterface {
     TextView lbl_credit;
-    Toolbar titlebar;
     Button btn_add;
     Button btn_remove;
     private SpinnerClass spinner;
@@ -54,19 +38,7 @@ public class MainActivity extends AppCompatActivity implements SelectStoreInterf
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        Button btn_addStore = (Button) findViewById(R.id.btn_addStore);
-        btn_addStore.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addStore();
-            }
-        });
-
-        lbl_credit = (TextView) findViewById(R.id.lbl_credit);
-        btn_add = (Button) findViewById(R.id.btn_add);
-        btn_remove = (Button) findViewById(R.id.btn_remove);
+        setContentView(R.layout.home);
 
         allStores = getSharedPreferences("stores", MODE_PRIVATE);
         storeSet = allStores.getStringSet("stores", new HashSet<String>());
@@ -79,12 +51,28 @@ public class MainActivity extends AppCompatActivity implements SelectStoreInterf
 
         allStoresEditor = allStores.edit();
         allStoresEditor.putStringSet("stores", storeSet);
-        allStoresEditor.commit();
-        for (Map.Entry test : allStores.getAll().entrySet()) {
-            System.out.println(test.toString());
-        }
+        allStoresEditor.apply();
 
-        spinner = new SpinnerClass(this, this, (Spinner) findViewById(R.id.storeDropdown), allStores);
+        SpinnerClass homeSelectStore = new SpinnerClass(this, this, (Spinner) findViewById(R.id.homeStoreDropdown), allStores, true);
+    }
+
+    @Override
+    public void onSelectFromHome() {
+        setContentView(R.layout.activity_main);
+
+        Button btn_addStore = findViewById(R.id.btn_addStore);
+        btn_addStore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addStore();
+            }
+        });
+
+        lbl_credit = findViewById(R.id.lbl_credit);
+        btn_add = findViewById(R.id.btn_add);
+        btn_remove = findViewById(R.id.btn_remove);
+
+        spinner = new SpinnerClass(this, this, (Spinner) findViewById(R.id.storeDropdown), allStores, false);
     }
 
     @Override
@@ -132,35 +120,6 @@ public class MainActivity extends AppCompatActivity implements SelectStoreInterf
 
         final StoreSave store = new StoreSave(storeName, this.getApplicationContext());
         final Button btn_Del = findViewById(R.id.btn_delStore);
-        btn_Del.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
-                alert.setTitle("Are you sure you want to delete " + storeName + "?");
-
-                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        storeSet.remove(storeName);
-                        allStoresEditor.remove("stores");
-                        allStoresEditor.commit();
-                        allStoresEditor.putStringSet("stores", storeSet);
-                        allStoresEditor.commit();
-                        store.removeSave();
-                        spinner.removeDropdownItem(storeName);
-                        selectStore(storeSet.toArray()[0].toString());
-                    }
-                });
-
-                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        // Canceled.
-                    }
-                });
-
-                alert.show();
-            }
-        });
 
         spinner.setSpinner(storeName);
 
@@ -227,6 +186,36 @@ public class MainActivity extends AppCompatActivity implements SelectStoreInterf
                         if (!input.getText().toString().isEmpty()) {
                             store.removeCredit(Float.parseFloat(input.getText().toString()));
                         }
+                    }
+                });
+
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Canceled.
+                    }
+                });
+
+                alert.show();
+            }
+        });
+
+        btn_Del.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+                alert.setTitle("Are you sure you want to delete " + storeName + "?");
+
+                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        storeSet.remove(storeName);
+                        allStoresEditor.remove("stores");
+                        allStoresEditor.commit();
+                        allStoresEditor.putStringSet("stores", storeSet);
+                        allStoresEditor.commit();
+                        store.removeSave();
+                        spinner.removeDropdownItem(storeName);
+                        selectStore(storeSet.toArray()[0].toString());
                     }
                 });
 

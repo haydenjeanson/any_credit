@@ -19,13 +19,15 @@ public class SpinnerClass implements AdapterView.OnItemSelectedListener {
     private ArrayAdapter<String> adapter = null;
     private Context context = null;
     private SelectStoreInterface storeInterface = null;
+    private Boolean isHomeSpinner;
+    private boolean firstSelection = true;
 
-    SpinnerClass(SelectStoreInterface storeInterface, final Context context, final Spinner spinner, final SharedPreferences stores) {
-        //this.dropdownList.add("");
+    SpinnerClass(SelectStoreInterface storeInterface, final Context context, final Spinner spinner, final SharedPreferences stores, final boolean isHomeSpinner) {
         populateExisting(stores);
 
         this.context = context;
         this.storeInterface = storeInterface;
+        this.isHomeSpinner = isHomeSpinner;
         this.spinner = spinner;
         this.adapter = new ArrayAdapter<String>(this.context, R.layout.store_spinner, dropdownList);
         this.adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -47,18 +49,29 @@ public class SpinnerClass implements AdapterView.OnItemSelectedListener {
 
     private void populateExisting(SharedPreferences storeList) {
         Set<String> storeSet = storeList.getStringSet("stores", new HashSet<String>());
-        for (String store : storeSet) {
-            dropdownList.add(store);
-        }
+        dropdownList.addAll(storeSet);
+//        for (String store : storeSet) {
+//            this.dropdownList.add(store);
+//        }
     }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        storeInterface.selectStore(parent.getItemAtPosition(pos).toString());
+        if (this.isHomeSpinner) {
+            if (!this.firstSelection) {
+                this.storeInterface.onSelectFromHome();
+                this.storeInterface.selectStore(parent.getItemAtPosition(pos).toString());
+            } else {
+                this.firstSelection = false;
+            }
+        } else {
+            this.storeInterface.selectStore(parent.getItemAtPosition(pos).toString());
+        }
+
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
-
+        // Do nothing
     }
 }
