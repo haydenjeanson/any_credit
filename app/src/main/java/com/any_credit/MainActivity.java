@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static android.text.InputType.TYPE_CLASS_NUMBER;
 import static android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL;
 
 public class MainActivity extends AppCompatActivity implements SelectStoreInterface {
@@ -127,9 +128,39 @@ public class MainActivity extends AppCompatActivity implements SelectStoreInterf
         alert.show();
     }
     @Override
-    public void selectStore(String storeName) {
+    public void selectStore(final String storeName) {
 
         final StoreSave store = new StoreSave(storeName, this.getApplicationContext());
+        final Button btn_Del = findViewById(R.id.btn_delStore);
+        btn_Del.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+                alert.setTitle("Are you sure you want to delete " + storeName + "?");
+
+                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        storeSet.remove(storeName);
+                        allStoresEditor.remove("stores");
+                        allStoresEditor.commit();
+                        allStoresEditor.putStringSet("stores", storeSet);
+                        allStoresEditor.commit();
+                        store.removeSave();
+                        spinner.removeDropdownItem(storeName);
+                        selectStore(storeSet.toArray()[0].toString());
+                    }
+                });
+
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Canceled.
+                    }
+                });
+
+                alert.show();
+            }
+        });
 
         spinner.setSpinner(storeName);
 
@@ -158,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements SelectStoreInterf
 
                 // Set an EditText view to get user input
                 final EditText input = new EditText(MainActivity.this);
-                input.setInputType(TYPE_NUMBER_FLAG_DECIMAL);
+                input.setInputType(TYPE_CLASS_NUMBER | TYPE_NUMBER_FLAG_DECIMAL);
                 alert.setView(input);
 
                 alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -188,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements SelectStoreInterf
 
                 // Set an EditText view to get user input
                 final EditText input = new EditText(MainActivity.this);
-                input.setInputType(TYPE_NUMBER_FLAG_DECIMAL);
+                input.setInputType(TYPE_CLASS_NUMBER | TYPE_NUMBER_FLAG_DECIMAL);
                 alert.setView(input);
 
                 alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {

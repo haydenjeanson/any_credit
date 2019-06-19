@@ -31,4 +31,5 @@
     <string name="credit_label">credit label</string>
     <string name="add_credit">Add Credit</string>
     <string name="remove_credit">Remove Credit</string>
+    <string name="arrow_to_pull">Arrow to pull</string>
 </resources>
