@@ -29,7 +29,7 @@ public class SpinnerClass implements AdapterView.OnItemSelectedListener {
         this.storeInterface = storeInterface;
         this.isHomeSpinner = isHomeSpinner;
         this.spinner = spinner;
-        this.adapter = new ArrayAdapter<String>(this.context, R.layout.store_spinner, dropdownList);
+        this.adapter = new ArrayAdapter<>(this.context, R.layout.store_spinner, dropdownList);
         this.adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         this.spinner.setAdapter(this.adapter);
         this.spinner.setOnItemSelectedListener(this);
@@ -43,16 +43,13 @@ public class SpinnerClass implements AdapterView.OnItemSelectedListener {
         this.dropdownList.remove(item);
     }
 
-    public void setSpinner(String item) {
+    void setSpinner(String item) {
         spinner.setSelection(adapter.getPosition(item));
     }
 
     private void populateExisting(SharedPreferences storeList) {
         Set<String> storeSet = storeList.getStringSet("stores", new HashSet<String>());
         dropdownList.addAll(storeSet);
-//        for (String store : storeSet) {
-//            this.dropdownList.add(store);
-//        }
     }
 
     @Override

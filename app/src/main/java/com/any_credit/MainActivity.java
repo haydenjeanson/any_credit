@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements SelectStoreInterf
     Button btn_add;
     Button btn_remove;
     private SpinnerClass spinner;
+    private SpinnerClass homeSelectStore;
     SharedPreferences allStores;
     SharedPreferences.Editor allStoresEditor;
     Set<String> storeSet;
@@ -48,25 +49,24 @@ public class MainActivity extends AppCompatActivity implements SelectStoreInterf
         } else {
             storeSet.remove("Home");
         }
-
+        storeSet.add("");
         allStoresEditor = allStores.edit();
         allStoresEditor.putStringSet("stores", storeSet);
         allStoresEditor.apply();
 
-        SpinnerClass homeSelectStore = new SpinnerClass(this, this, (Spinner) findViewById(R.id.homeStoreDropdown), allStores, true);
+        homeSelectStore = new SpinnerClass(this, this, (Spinner) findViewById(R.id.homeStoreDropdown), allStores, true);
+
+        storeSet.remove("");
+        allStoresEditor.remove("stores");
+        allStoresEditor.commit();
+        allStoresEditor.putStringSet("stores", storeSet);
+        allStoresEditor.apply();
+
     }
 
     @Override
     public void onSelectFromHome() {
         setContentView(R.layout.activity_main);
-
-        Button btn_addStore = findViewById(R.id.btn_addStore);
-        btn_addStore.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addStore();
-            }
-        });
 
         lbl_credit = findViewById(R.id.lbl_credit);
         btn_add = findViewById(R.id.btn_add);
@@ -75,14 +75,16 @@ public class MainActivity extends AppCompatActivity implements SelectStoreInterf
         spinner = new SpinnerClass(this, this, (Spinner) findViewById(R.id.storeDropdown), allStores, false);
     }
 
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
+    protected void goHome() {
+        setContentView(R.layout.home);
+
+        storeSet.add("");
+        allStoresEditor.remove("stores");
+        allStoresEditor.commit();
+        allStoresEditor.putStringSet("stores", storeSet);
+        allStoresEditor.apply();
+
+        homeSelectStore = new SpinnerClass(MainActivity.this, MainActivity.this, (Spinner) findViewById(R.id.homeStoreDropdown), allStores, true);
     }
 
     protected void addStore() {
@@ -119,7 +121,9 @@ public class MainActivity extends AppCompatActivity implements SelectStoreInterf
     public void selectStore(final String storeName) {
 
         final StoreSave store = new StoreSave(storeName, this.getApplicationContext());
-        final Button btn_Del = findViewById(R.id.btn_delStore);
+        final Button btn_addStore = findViewById(R.id.btn_addStore);
+        final Button btn_del = findViewById(R.id.btn_delStore);
+        final Button btn_home = findViewById(R.id.btn_home);
 
         spinner.setSpinner(storeName);
 
@@ -199,7 +203,14 @@ public class MainActivity extends AppCompatActivity implements SelectStoreInterf
             }
         });
 
-        btn_Del.setOnClickListener(new View.OnClickListener() {
+        btn_addStore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addStore();
+            }
+        });
+
+        btn_del.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -226,6 +237,13 @@ public class MainActivity extends AppCompatActivity implements SelectStoreInterf
                 });
 
                 alert.show();
+            }
+        });
+
+        btn_home.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                goHome();
             }
         });
     }
